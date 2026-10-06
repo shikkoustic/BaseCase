@@ -267,7 +267,7 @@ export function RoadmapTree({
 
   return (
     <div className="overflow-x-auto">
-      <div className="relative h-[1550px] w-full" style={{ minWidth: CANVAS_MIN_WIDTH }}>
+      <div className="relative h-[1050px] w-full" style={{ minWidth: CANVAS_MIN_WIDTH }}>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
           {EDGES.map(([from, to]) => {
             const a = positions.get(from);

@@ -228,7 +228,7 @@ export async function getRatingHistory(handle: string): Promise<CodeChefRatingPo
   if (!res.ok) throw new Error(`CodeChef profile request failed: ${res.status}`);
 
   const html = await res.text();
-  const match = html.match(/var all_rating\s*=\s*(\[.*?\]);/s);
+  const match = html.match(/var all_rating\s*=\s*(\[[\s\S]*?\]);/);
   if (!match) return [];
 
   type RawEntry = { name: string; getyear: string; getmonth: string; getday: string; rating: string; rank: string };

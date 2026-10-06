@@ -78,7 +78,7 @@ export function TopicCategoryGroupRow({
           <Tabs defaultValue={subTopics[0].slug}>
             <TabsList variant="line" className="mb-4 flex-wrap">
               {subTopics.map((t) => (
-                <TabsTrigger key={t.slug} value={t.slug}>
+                <TabsTrigger key={t.slug} value={t.slug} className="flex-none">
                   {t.name.startsWith(`${category}:`) ? t.name.slice(category.length + 1).trim() : t.name}
                 </TabsTrigger>
               ))}

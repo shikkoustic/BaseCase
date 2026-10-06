@@ -10,7 +10,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const post = getBlogPost(slug);
-  return { title: post ? `${post.title} | DSA Club` : "Blog | DSA Club" };
+  return { title: post ? `${post.title} | BaseCase` : "Blog | BaseCase" };
 }
 
 export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">) {

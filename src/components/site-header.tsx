@@ -15,7 +15,7 @@ export async function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <Logo className="size-7" />
-          DSA Club
+          BaseCase
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">

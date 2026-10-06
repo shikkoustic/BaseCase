@@ -19,7 +19,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DSA Club — master DSA with LeetCode + CodeChef",
+  title: "BaseCase — master DSA with LeetCode + CodeChef",
   description:
     "A curated, topic-wise DSA roadmap across LeetCode and CodeChef, with a unified daily-activity tracker.",
 };

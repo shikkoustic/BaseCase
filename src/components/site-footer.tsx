@@ -23,7 +23,7 @@ export function SiteFooter() {
           <div>
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
               <Logo className="size-7" />
-              DSA Club
+              BaseCase
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               A topic-wise question bank curated from LeetCode and CodeChef,
@@ -33,7 +33,7 @@ export function SiteFooter() {
           </div>
 
           <FooterColumn title="Topics" links={TOPIC_LINKS} />
-          <FooterColumn title="DSA Club" links={SITE_LINKS} />
+          <FooterColumn title="BaseCase" links={SITE_LINKS} />
 
           <div>
             <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -54,9 +54,8 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} DSA Club. Free, always.</p>
-          <p>Built for students, by a student.</p>
+        <div className="mt-10 border-t border-border/60 pt-6 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} BaseCase.</p>
         </div>
       </div>
     </footer>

@@ -1,3 +1,5 @@
+// Three nested frames collapsing to a solid center — a recursive call
+// narrowing down until it terminates, i.e. hits its base case.
 export function Logo({ className }: { className?: string }) {
   return (
     <svg
@@ -8,27 +10,27 @@ export function Logo({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <rect width="32" height="32" rx="8" className="fill-foreground" />
-      <path
-        d="M11.5 11L7.5 16L11.5 21"
+      <rect
+        x="6.5"
+        y="6.5"
+        width="19"
+        height="19"
+        rx="4"
         stroke="var(--background)"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="1.6"
+        opacity="0.45"
       />
-      <path
-        d="M20.5 11L24.5 16L20.5 21"
+      <rect
+        x="10.5"
+        y="10.5"
+        width="11"
+        height="11"
+        rx="2.5"
         stroke="var(--background)"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="1.6"
+        opacity="0.75"
       />
-      <path
-        d="M17.25 8.5L14.75 23.5"
-        stroke="var(--background)"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
+      <rect x="14" y="14" width="4" height="4" rx="1" fill="var(--background)" />
     </svg>
   );
 }

@@ -24,11 +24,8 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-6xl px-4">
       <section className="flex flex-col items-start gap-6 py-16 sm:py-24">
-        <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-          Free — no paywalls, ever
-        </span>
         <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
-          Stop wandering, start solving.
+          Stop Wandering, Start Solving.
         </h1>
         <p className="max-w-xl text-lg text-muted-foreground">
           A topic-wise question bank curated from LeetCode and CodeChef, with

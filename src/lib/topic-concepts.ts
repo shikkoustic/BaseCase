@@ -669,7 +669,7 @@ for coin in coins:
     tip: "Name what plays \"item\", \"capacity\", and \"value\" in the new problem before writing the recurrence — that mapping is usually the entire difficulty.",
   },
 
-  "dp-strings": {
+  "dp-lcs": {
     whyItMatters:
       "Two strings walked index by index is one of the most reused DP shapes — edit distance, LCS, and palindrome problems all share the same backbone.",
     coreIdea:
@@ -696,6 +696,46 @@ for i in range(1, len(a) + 1):
       answer: "\"The answer considering the first i characters of A and the first j of B\" — say that sentence before writing the transition.",
     },
     tip: "Draw a small 4x4 grid by hand for two short example strings — it makes the fill order and base cases far easier to get right than reasoning purely in code.",
+  },
+
+  "dp-lis": {
+    whyItMatters:
+      "The state is \"the best subsequence ending at index i\" — a shape that shows up any time order matters but elements can be skipped, from stock-span problems to envelope-nesting puzzles.",
+    coreIdea:
+      "dp[i] = length of the longest increasing subsequence ending exactly at i, built by scanning every earlier index j and taking dp[j] + 1 wherever nums[j] < nums[i]. That's O(n^2). The O(n log n) version keeps a separate array of \"smallest tail for each subsequence length\" and binary-searches it per element — it computes the right length without ever materializing the actual subsequence, which is the part people find counterintuitive the first time.",
+    patterns: [
+      {
+        name: "O(n^2) — ending-here DP",
+        description: "dp[i] looks back at every earlier compatible index.",
+        code: `dp = [1] * n
+for i in range(n):
+    for j in range(i):
+        if nums[j] < nums[i]:
+            dp[i] = max(dp[i], dp[j] + 1)
+# max(dp) is the answer`,
+      },
+      {
+        name: "O(n log n) — patience sorting",
+        description: "tails[k] is the smallest possible tail value of an increasing subsequence of length k+1.",
+        code: `tails = []
+for x in nums:
+    pos = bisect_left(tails, x)
+    if pos == len(tails):
+        tails.append(x)
+    else:
+        tails[pos] = x
+# len(tails) is the answer`,
+      },
+    ],
+    complexity: [
+      "O(n^2) time for the straightforward ending-here DP",
+      "O(n log n) time, O(n) space for the patience-sorting / binary-search version",
+    ],
+    mentalModel: {
+      question: "Am I asking for the actual subsequence, or just its length?",
+      answer: "Just the length → the O(n log n) tails trick works directly. Need to reconstruct it, or the comparison isn't a simple '<' → fall back to the O(n^2) ending-here DP.",
+    },
+    tip: "The 'tails' array in the fast version is NOT the answer subsequence — it's a scratch structure that only happens to have the right length. Don't try to read the actual LIS off of it.",
   },
 
   "dp-stocks": {
@@ -761,6 +801,78 @@ for r in range(1, rows):
       answer: "Fill order matters more here than in 1D DP — row by row for grids, post-order for trees, increasing length for intervals.",
     },
     tip: "Interval DP fills by increasing sub-range length, not row/column order — that's the detail most likely to trip you up coming from grid DP.",
+  },
+
+  "dp-interval": {
+    whyItMatters:
+      "The state is a sub-range [i, j] rather than a single index — the shape behind 'split this range at some point and combine the two halves optimally,' which covers everything from matrix-chain-style problems to two-player games played on a range.",
+    coreIdea:
+      "dp[i][j] = the best answer for the sub-range from i to j, built by trying every split point k between i and j and combining dp[i][k] with dp[k+1][j] (plus whatever cost the split itself adds). Because dp[i][j] depends on strictly smaller sub-ranges, you must fill the table by increasing length — not row-by-row or column-by-column like grid DP. Game-theory problems (Stone Game, Predict the Winner) use the exact same shape: dp[i][j] is 'the best score the current player can guarantee on this sub-range,' and the recurrence subtracts the opponent's best response.",
+    patterns: [
+      {
+        name: "Interval DP by increasing length",
+        description: "Outer loop is sub-range length, inner loop is the start index — this ordering is the whole trick.",
+        code: `for length in range(2, n + 1):
+    for i in range(n - length + 1):
+        j = i + length - 1
+        for k in range(i, j):
+            dp[i][j] = best(dp[i][j], combine(dp[i][k], dp[k + 1][j]))`,
+      },
+      {
+        name: "Game on a range (minimax)",
+        description: "The current player's best score is their pick minus the best the opponent can then force.",
+        code: `def solve(i, j):
+    if i > j:
+        return 0
+    pick_left = nums[i] - solve(i + 1, j)
+    pick_right = nums[j] - solve(i, j - 1)
+    return max(pick_left, pick_right)
+# solve(0, n-1) >= 0 means the first player can guarantee a win`,
+      },
+    ],
+    complexity: [
+      "O(n^3) time for most split-point interval DP (O(n^2) states × O(n) split choices)",
+      "O(n^2) time for the minimax game-on-a-range variant (no separate split loop)",
+      "O(n^2) space for the table",
+    ],
+    mentalModel: {
+      question: "Does the answer for [i, j] depend on smaller sub-ranges strictly inside it, not just one neighbor?",
+      answer: "Fill by increasing sub-range length, trying every split point k inside (i, j) and combining the two resulting halves.",
+    },
+    tip: "If you're filling the table in the wrong order, you'll read a dp[i][k] or dp[k+1][j] that hasn't been computed yet and silently get garbage — always loop by length first when in doubt.",
+  },
+
+  "dp-advanced": {
+    whyItMatters:
+      "The hardest DP shapes: a bitmask tracking exactly which of a small set of items have been used, or DP layered on top of another technique entirely (scheduling, matching, string construction). These are rare in easy/medium interviews but common in the hardest rounds and in competitive programming.",
+    coreIdea:
+      "Bitmask DP works because n is small (typically n <= 20) — the state 'which subset of items have I used' fits in an integer, and dp[mask] or dp[i][mask] is the best answer having used exactly that subset. The recurrence tries adding one more unused item (checking `mask & (1 << j) == 0`) and transitions to `mask | (1 << j)`. Problems that combine DP with another idea (shortest superstring, job scheduling, matching two groups) usually reduce to this same bitmask shape once you identify what the 'items' are.",
+    patterns: [
+      {
+        name: "Bitmask DP template",
+        description: "dp[mask] is the best answer having used exactly the items set in mask.",
+        code: `dp = {0: 0}
+for mask in range(1 << n):
+    if mask not in dp:
+        continue
+    for j in range(n):
+        if mask & (1 << j):
+            continue
+        new_mask = mask | (1 << j)
+        candidate = dp[mask] + cost(mask, j)
+        dp[new_mask] = min(dp.get(new_mask, float('inf')), candidate)
+# dp[(1 << n) - 1] is the answer`,
+      },
+    ],
+    complexity: [
+      "O(2^n × n) or O(2^n × n^2) time depending on the transition — this is why n is capped around 15-20",
+      "O(2^n) space for the mask-indexed table",
+    ],
+    mentalModel: {
+      question: "Is n small (<= ~20) and does the answer depend on exactly which subset of items has been used so far, not just how many?",
+      answer: "Yes → bitmask DP. The state is the mask itself; figure out what one bit represents before writing any code.",
+    },
+    tip: "Before coding, write one sentence: 'bit j of the mask means ___.' If you can't fill that blank precisely, the recurrence will be wrong no matter how carefully you code it.",
   },
 
   greedy: {

@@ -5,7 +5,7 @@ import { BlogCover } from "@/components/blog-cover";
 import { categoryBadgeClass } from "@/lib/blog-category-color";
 
 export const metadata = {
-  title: "Blog | DSA Club",
+  title: "Blog | BaseCase",
 };
 
 export default function BlogPage() {

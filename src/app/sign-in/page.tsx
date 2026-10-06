@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { GoogleIcon } from "@/components/google-icon";
@@ -8,9 +8,20 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={<SignInCard authError={null} />}>
+      <SignInPageContent />
+    </Suspense>
+  );
+}
+
+function SignInPageContent() {
   const searchParams = useSearchParams();
+  return <SignInCard authError={searchParams.get("error")} />;
+}
+
+function SignInCard({ authError }: { authError: string | null }) {
   const [loading, setLoading] = useState(false);
-  const authError = searchParams.get("error");
 
   // Always lands back on the homepage after signing in, regardless of
   // which page (if any) bounced the visitor to /sign-in first.
@@ -28,7 +39,7 @@ export default function SignInPage() {
   return (
     <div className="mx-auto flex max-w-sm flex-col items-center px-4 py-24 text-center">
       <Logo className="size-10" />
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Sign in to DSA Club</h1>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Sign in to BaseCase</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Your roadmap, dashboard, and contest tracker are saved to your account.
       </p>
