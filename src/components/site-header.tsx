@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MobileNav } from "@/components/mobile-nav";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -38,6 +39,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {signedIn && <MobileNav />}
           <ThemeToggle />
           {signedIn ? (
             <form action={signOutAction}>
