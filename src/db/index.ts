@@ -16,7 +16,13 @@ const client = postgres(process.env.DATABASE_URL, {
   // connection limit, which shows up as requests randomly hanging. Each
   // invocation only ever needs one connection at a time, so cap it there and
   // let the pooler (not this client) handle fanning out across instances.
-  max: 1,
+  //
+  // Locally, `next dev` is ONE long-running process, not many short-lived
+  // instances — max:1 there means every concurrent request across every tab
+  // shares a single connection and queues behind whichever one holds it,
+  // which is what turned ordinary local testing into multi-minute hangs.
+  // VERCEL is set automatically in that environment and absent locally.
+  max: process.env.VERCEL ? 1 : 10,
   // Supabase's pooler silently closes idle connections server-side; without
   // these, postgres-js can hand out a dead connection from its pool and the
   // next query hangs until it times out (seen as "read ETIMEDOUT").
