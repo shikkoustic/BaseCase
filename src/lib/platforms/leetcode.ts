@@ -3,12 +3,19 @@
 // "LeetCode stats" tool.
 const ENDPOINT = "https://leetcode.com/graphql";
 
+// Plain fetch() has no default timeout — if LeetCode is slow or unreachable
+// from wherever this runs, an un-timed-out request hangs forever, hanging
+// whatever page called it (every LeetCode call in this file goes through
+// this one function, so this single timeout covers all of them).
+const FETCH_TIMEOUT_MS = 10_000;
+
 async function query<T>(query: string, variables: Record<string, unknown>): Promise<T> {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(`LeetCode GraphQL request failed: ${res.status}`);
