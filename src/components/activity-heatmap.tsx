@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/use-mounted";
 
@@ -51,6 +51,11 @@ export function ActivityHeatmap({
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
   const scrollRef = useRef<HTMLDivElement>(null);
+  // A native SVG/HTML `title` tooltip waits out the browser's own hover
+  // delay (1-2s, OS-controlled, not something CSS/JS can shorten) before
+  // appearing — this renders the tooltip ourselves instead, so it shows the
+  // instant the cursor lands on a cell, matching LeetCode's own calendar.
+  const [hovered, setHovered] = useState<{ x: number; y: number; text: string } | null>(null);
 
   const countByDate = useMemo(() => {
     const map = new Map<string, number>();
@@ -104,39 +109,55 @@ export function ActivityHeatmap({
 
   return (
     <div ref={scrollRef} className="overflow-x-auto pb-1">
-      <svg
-        width={totalWidth}
-        height={LABEL_HEIGHT + 7 * PITCH - MARGIN}
-        className="overflow-visible"
-        style={{ fontSize: 11 }}
-      >
-        {months.map((m) => (
-          <text
-            key={m.key}
-            x={m.x + (m.cols * PITCH - MARGIN) / 2}
-            y={LABEL_HEIGHT - 5}
-            textAnchor="middle"
-            className="fill-muted-foreground"
+      <div className="relative inline-block">
+        {hovered && (
+          <div
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs font-medium text-background shadow-md"
+            style={{ left: hovered.x, top: hovered.y - 6 }}
           >
-            {m.label}
-          </text>
-        ))}
-        {months.map((m) =>
-          m.cells.map((cell) => (
-            <rect
-              key={cell.date}
-              x={m.x + cell.col * PITCH}
-              y={LABEL_HEIGHT + cell.row * PITCH}
-              width={CELL}
-              height={CELL}
-              rx={2}
-              fill={colors[levelFor(cell.count)]}
-            >
-              <title>{tooltipText(cell.date, cell.count)}</title>
-            </rect>
-          )),
+            {hovered.text}
+          </div>
         )}
-      </svg>
+        <svg
+          width={totalWidth}
+          height={LABEL_HEIGHT + 7 * PITCH - MARGIN}
+          className="overflow-visible"
+          style={{ fontSize: 11 }}
+        >
+          {months.map((m) => (
+            <text
+              key={m.key}
+              x={m.x + (m.cols * PITCH - MARGIN) / 2}
+              y={LABEL_HEIGHT - 5}
+              textAnchor="middle"
+              className="fill-muted-foreground"
+            >
+              {m.label}
+            </text>
+          ))}
+          {months.map((m) =>
+            m.cells.map((cell) => {
+              const x = m.x + cell.col * PITCH;
+              const y = LABEL_HEIGHT + cell.row * PITCH;
+              return (
+                <rect
+                  key={cell.date}
+                  x={x}
+                  y={y}
+                  width={CELL}
+                  height={CELL}
+                  rx={2}
+                  fill={colors[levelFor(cell.count)]}
+                  onMouseEnter={() =>
+                    setHovered({ x: x + CELL / 2, y, text: tooltipText(cell.date, cell.count) })
+                  }
+                  onMouseLeave={() => setHovered(null)}
+                />
+              );
+            }),
+          )}
+        </svg>
+      </div>
     </div>
   );
 }
