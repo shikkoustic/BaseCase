@@ -11,6 +11,12 @@ import * as cheerio from "cheerio";
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
 
+// Plain fetch() has no default timeout — if CodeChef is slow or unreachable
+// from wherever this runs, an un-timed-out request hangs forever, which
+// hangs the whole page (a .catch() on the caller can't save a promise that
+// never settles). Every request below aborts after this long instead.
+const FETCH_TIMEOUT_MS = 10_000;
+
 export type CodeChefProfile = {
   rating: number | null;
   stars: string | null;
@@ -25,6 +31,7 @@ export async function getProfile(handle: string): Promise<CodeChefProfile | null
   const res = await fetch(`https://www.codechef.com/users/${encodeURIComponent(handle)}`, {
     headers: { "User-Agent": UA },
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`CodeChef profile request failed: ${res.status}`);
@@ -74,6 +81,7 @@ export async function getName(handle: string): Promise<string | null> {
   const res = await fetch(`https://www.codechef.com/users/${encodeURIComponent(handle)}`, {
     headers: { "User-Agent": UA },
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`CodeChef profile request failed: ${res.status}`);
@@ -114,7 +122,11 @@ export async function getRecentActivity(handle: string, limit = 20): Promise<Cod
   for (let page = 0; page < pagesNeeded; page++) {
     const res = await fetch(
       `https://www.codechef.com/recent/user?page=${page}&user_handle=${encodeURIComponent(handle)}`,
-      { headers: { "User-Agent": UA }, next: { revalidate: 0 } },
+      {
+        headers: { "User-Agent": UA },
+        next: { revalidate: 0 },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      },
     );
     if (!res.ok) break;
 
@@ -179,6 +191,7 @@ export async function getContests(): Promise<CodeChefContest[]> {
   const res = await fetch("https://www.codechef.com/api/list/contests/all", {
     headers: { "User-Agent": UA },
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`CodeChef contests request failed: ${res.status}`);
 
@@ -223,6 +236,7 @@ export async function getRatingHistory(handle: string): Promise<CodeChefRatingPo
   const res = await fetch(`https://www.codechef.com/users/${encodeURIComponent(handle)}`, {
     headers: { "User-Agent": UA },
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`CodeChef profile request failed: ${res.status}`);
