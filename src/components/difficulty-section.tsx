@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Lightbulb, Loader2 } from "lucide-react";
+import { Lightbulb, Loader2 } from "lucide-react";
 import { useCheckedProblems } from "@/hooks/use-checked-problems";
 import { useAutoSolved } from "@/contexts/auto-solved";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -92,11 +92,14 @@ export function DifficultySection({
                 onCheckedChange={(value) => setProblemChecked(problem.id, value === true)}
               />
               <span className="w-5 shrink-0 font-mono text-xs text-muted-foreground">{i + 1}</span>
-              <span
-                className={`flex-1 truncate text-sm ${isChecked ? "text-muted-foreground line-through" : ""}`}
+              <a
+                href={problem.url}
+                target="_blank"
+                rel="noreferrer"
+                className={`flex-1 truncate text-sm hover:text-foreground hover:underline ${isChecked ? "text-muted-foreground line-through" : ""}`}
               >
                 {problem.title}
-              </span>
+              </a>
               {isAuto && (
                 <span
                   title="Detected from your solved problems on this platform"
@@ -114,15 +117,6 @@ export function DifficultySection({
               >
                 <Lightbulb className="size-4" />
               </button>
-              <a
-                href={problem.url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-              >
-                Open
-                <ExternalLink className="size-3" />
-              </a>
             </div>
           );
         })}
