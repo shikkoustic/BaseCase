@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ArrowRight } from "lucide-react";
 import { useCheckedProblems } from "@/hooks/use-checked-problems";
 import { useAutoSolved } from "@/contexts/auto-solved";
 import { DifficultySection } from "@/components/difficulty-section";
@@ -86,15 +86,16 @@ export function TopicCategoryGroupRow({
 
             {subTopics.map((t) => (
               <TabsContent key={t.slug} value={t.slug} className="space-y-6">
-                <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
                   <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
                     {t.description}
                   </p>
                   <Link
                     href={`/topics/${t.slug}`}
-                    className="shrink-0 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
                   >
-                    Open full page
+                    Getting started with {t.name}
+                    <ArrowRight className="size-3.5" />
                   </Link>
                 </div>
 

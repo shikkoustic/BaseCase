@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ArrowRight } from "lucide-react";
 import { useCheckedProblems } from "@/hooks/use-checked-problems";
 import { useAutoSolved } from "@/contexts/auto-solved";
 import { DifficultySection } from "@/components/difficulty-section";
@@ -36,10 +36,17 @@ export function TopicAccordionRow({
 
   return (
     <div className="overflow-hidden rounded-lg border border-foreground/[0.06] bg-foreground/[0.015]">
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-foreground/[0.03]"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
+        }}
+        className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-foreground/[0.03]"
       >
         <span className="w-6 shrink-0 font-mono text-xs text-muted-foreground/60">
           {String(index + 1).padStart(2, "0")}
@@ -48,24 +55,31 @@ export function TopicAccordionRow({
         {topic.category && (
           <span className="hidden shrink-0 text-xs text-muted-foreground/70 sm:inline">{topic.category}</span>
         )}
-        <span className="min-w-0 flex-1 truncate font-medium">{topic.name}</span>
+        <Link
+          href={`/topics/${topic.slug}`}
+          onClick={(e) => e.stopPropagation()}
+          className="min-w-0 flex-1 truncate font-medium hover:underline"
+        >
+          {topic.name}
+        </Link>
         <span className="shrink-0 font-mono text-xs text-muted-foreground">
           {solved}/{total}
         </span>
         <ChevronDown
           className={`size-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
         />
-      </button>
+      </div>
 
       {open && (
         <div className="space-y-6 border-t border-foreground/[0.06] bg-foreground/[0.01] px-4 py-5">
-          <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{topic.description}</p>
             <Link
               href={`/topics/${topic.slug}`}
-              className="shrink-0 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
             >
-              Open full page
+              Getting started with {topic.name}
+              <ArrowRight className="size-3.5" />
             </Link>
           </div>
 
