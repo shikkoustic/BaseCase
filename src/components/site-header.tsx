@@ -14,10 +14,13 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <Logo className="size-7" />
-          BaseCase
-        </Link>
+        <div className="flex items-center gap-1">
+          {signedIn && <MobileNav />}
+          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+            <Logo className="size-7" />
+            BaseCase
+          </Link>
+        </div>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
           {signedIn && (
@@ -39,7 +42,6 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {signedIn && <MobileNav />}
           <ThemeToggle />
           {signedIn ? (
             <form action={signOutAction}>
