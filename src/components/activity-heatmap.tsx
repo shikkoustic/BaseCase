@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/use-mounted";
 
@@ -15,6 +16,18 @@ const LEVEL_COLORS = {
   light: ["#ebedf0", "#c6e6c6", "#7fcf7f", "#3fae3f", "#1f7a1f"],
   dark: ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
 };
+
+// Used for the month-header labels. NOT toLocaleString(undefined, {month:
+// "short"}) — "undefined locale" resolves independently on the server
+// (Node) and in the browser, and they don't always agree on the short form
+// of September ("Sep" vs "Sept"), which is exactly specific enough to
+// trigger a real SSR/CSR hydration mismatch on every page load (confirmed:
+// this was happening, forcing React to discard and re-render the whole
+// heatmap client-side instead of hydrating it).
+const MONTH_LABELS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 
 const CELL = 12; // block size
 const MARGIN = 4; // gap between cells within a month
@@ -51,6 +64,11 @@ export function ActivityHeatmap({
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
   const scrollRef = useRef<HTMLDivElement>(null);
+  // A native SVG/HTML `title` tooltip waits out the browser's own hover
+  // delay (1-2s, OS-controlled, not something CSS/JS can shorten) before
+  // appearing — this renders the tooltip ourselves instead, so it shows the
+  // instant the cursor lands on a cell, matching LeetCode's own calendar.
+  const [hovered, setHovered] = useState<{ x: number; y: number; text: string } | null>(null);
 
   const countByDate = useMemo(() => {
     const map = new Map<string, number>();
@@ -87,7 +105,7 @@ export function ActivityHeatmap({
       const cols = Math.floor((firstDow + lastDay - 1) / 7) + 1;
 
       if (months.length > 0) x += MONTH_GAP;
-      months.push({ key: `${year}-${month}`, label: cursor.toLocaleString(undefined, { month: "short" }), x, cols, cells });
+      months.push({ key: `${year}-${month}`, label: MONTH_LABELS[month], x, cols, cells });
       x += cols * PITCH;
 
       cursor = new Date(year, month + 1, 1);
@@ -122,21 +140,49 @@ export function ActivityHeatmap({
           </text>
         ))}
         {months.map((m) =>
-          m.cells.map((cell) => (
-            <rect
-              key={cell.date}
-              x={m.x + cell.col * PITCH}
-              y={LABEL_HEIGHT + cell.row * PITCH}
-              width={CELL}
-              height={CELL}
-              rx={2}
-              fill={colors[levelFor(cell.count)]}
-            >
-              <title>{tooltipText(cell.date, cell.count)}</title>
-            </rect>
-          )),
+          m.cells.map((cell) => {
+            const x = m.x + cell.col * PITCH;
+            const y = LABEL_HEIGHT + cell.row * PITCH;
+            return (
+              <rect
+                key={cell.date}
+                x={x}
+                y={y}
+                width={CELL}
+                height={CELL}
+                rx={2}
+                fill={colors[levelFor(cell.count)]}
+                onMouseEnter={(e) => {
+                  // Real viewport coordinates + a fixed-position portal, not a
+                  // child positioned absolutely inside this scrollable div —
+                  // that approach got clipped by the heatmap's own
+                  // overflow-x-auto for any cell near the scrolled edge
+                  // (every cell in the most recent, auto-scrolled-into-view
+                  // month, i.e. exactly the ones most likely to be hovered).
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setHovered({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top,
+                    text: tooltipText(cell.date, cell.count),
+                  });
+                }}
+                onMouseLeave={() => setHovered(null)}
+              />
+            );
+          }),
         )}
       </svg>
+      {mounted &&
+        hovered &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs font-medium text-background shadow-md"
+            style={{ left: hovered.x, top: hovered.y - 6 }}
+          >
+            {hovered.text}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
