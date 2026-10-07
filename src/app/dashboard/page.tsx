@@ -131,9 +131,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
                   <CardTitle className="text-base">LeetCode — {lc}</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-3 gap-2 text-center">
-                  <Stat label="Easy" value={leetcodeStats.easy} />
-                  <Stat label="Medium" value={leetcodeStats.medium} />
-                  <Stat label="Hard" value={leetcodeStats.hard} />
+                  <Stat label="Easy" value={leetcodeStats.easy} difficulty="easy" />
+                  <Stat label="Medium" value={leetcodeStats.medium} difficulty="medium" />
+                  <Stat label="Hard" value={leetcodeStats.hard} difficulty="hard" />
                 </CardContent>
               </Card>
             )}
@@ -182,10 +182,42 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+// LeetCode's own difficulty colors (matched exactly, not the app's usual
+// emerald/amber/rose, so this reads at a glance the same way LeetCode's own
+// profile stats do).
+const DIFFICULTY_RING_COLOR: Record<string, string> = {
+  easy: "#00af9b",
+  medium: "#ffb800",
+  hard: "#ff2d55",
+};
+
+function Stat({
+  label,
+  value,
+  difficulty,
+}: {
+  label: string;
+  value: number;
+  difficulty?: "easy" | "medium" | "hard";
+}) {
+  if (!difficulty) {
+    return (
+      <div>
+        <p className="text-xl font-semibold">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
+    );
+  }
+
+  const color = DIFFICULTY_RING_COLOR[difficulty];
   return (
-    <div>
-      <p className="text-xl font-semibold">{value}</p>
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        className="flex size-14 items-center justify-center rounded-full border-2 text-base font-semibold"
+        style={{ borderColor: color, color }}
+      >
+        {value}
+      </div>
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
