@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, ExternalLink, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { PlatformIcon } from "@/components/platform-icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RecentActivityResponse } from "@/app/api/recent-activity/route";
@@ -78,7 +78,18 @@ export function RecentSubmissions({ options }: { options: Option[] }) {
                     ) : (
                       <XCircle className="size-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
                     )}
-                    <span className="truncate">{item.title}</span>
+                    {item.url ? (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="truncate hover:text-foreground hover:underline"
+                      >
+                        {item.title}
+                      </a>
+                    ) : (
+                      <span className="truncate">{item.title}</span>
+                    )}
                     {!accepted && (
                       <span className="shrink-0 text-xs text-muted-foreground">({item.result})</span>
                     )}
@@ -87,16 +98,6 @@ export function RecentSubmissions({ options }: { options: Option[] }) {
                   <span className="flex shrink-0 items-center gap-3 text-xs text-muted-foreground">
                     {item.timestamp && (
                       <span>{new Date(item.timestamp).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-                    )}
-                    {item.url && (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1 hover:text-foreground"
-                      >
-                        Open <ExternalLink className="size-3" />
-                      </a>
                     )}
                   </span>
                 </li>
